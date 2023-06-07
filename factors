@@ -1,29 +1,20 @@
-#!/usr/bin/python3
+#! /usr/bin/env python3
 from sys import argv
 
-def factorize(value):
-        i = 2
 
-    if value < 2:
-        return
-    print()
-    print(value, "<- value-bef")
-    while value % i:
-        i += 1
-    print("{:.0f}={:.0f}*{:.0f}".format(value, value / i, i))
-    print(value, "<- value-aft")
-    print()
+def factorize():
+    with open(argv[1]) as f:
+        for number in f:
+            num = int(number)
+            flag = 0
+            for i in range(2, int(num / 2) + 1, 1):
+                if num % i == 0:
+                    print("{:d}={}*{}".format(num, num // i, i))
+                    flag = 1
+                    break
+            if flag == 0:
+                print("{:d}={}*{}".format(num, num, 1))
 
-if len(argv) != 2:
-    exit()
 
-try:
-    with open(argv[1]) as file:
-        line = file.readline()
-
-        while line != "":
-            value = int(line.split('\n')[0])
-            factorize(value)
-            line = file.readline()
-except:
-    pass
+if __name__ == "__main__":
+    factorize()
