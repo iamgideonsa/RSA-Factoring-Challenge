@@ -1,44 +1,48 @@
-#!/usr/bin/python3
+#!/usr/bin/env bash
+#is a challenge
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
-import sys
-import math
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-def is_prime(num):
-    """Check if a number is prime"""
-    if num < 2:
-        return False
-    for i in range(2, int(math.sqrt(num)) + 1):
-        if num % i == 0:
-            return False
-    return True
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-def is_rsa(n):
-    """Split the RSA of a number"""
-    a = int(math.sqrt(n)) + 1
-    while True:
-        b = a ** 2 - n
-        if math.isqrt(b) ** 2 == b:
-            c = math.isqrt(b)
-            break
-        a += 1
-    if is_prime(a + c) and is_prime(a - c):
-        print(f"{n}={a + c}*{a - c}")
+        echo "$num$num1*$num2"
+}
 
-def start():
-    """Entry point of the script"""
-    if len(sys.argv) < 2:
-        print("Error!: <USAGE> -> ./rsa filename")
-        sys.exit(1)
-    
-    filename = sys.argv[1]
-    with open(filename) as file_in:
-        line = file_in.readline().strip()
-    
-    if not line:
-        print("The file is empty")
-        sys.exit(1)
-    
-    is_rsa(int(line))
+if [ $# -ne 1 ]
+then
+        echo 'Usage: rsa <file>'
+        exit 1
+else
 
-start()
+        while read i
+        do
 
+                result=$(factor "$i")
+                check_factor $result
+
+        done < "$1"
+fi
