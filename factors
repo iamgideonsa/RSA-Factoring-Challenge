@@ -1,30 +1,41 @@
-#!/usr/bin/python3
+#!/usr/bin/env bash
+# This is a factors challenge
 
-def check_factors(number_list):
-    """Check the factors of numbers in a list"""
-    import sys
+check_factor() {
+    if [ $# -ne 1 ]; then
+        echo "Usage: check_factor <number>"
+        exit 1
+    fi
 
-    if len(number_list) == 0 or number_list is None:
-        print("An error occurred")
-    for number in number_list:
-        num = int(number)
-        for divisor in range(2, sys.maxsize):
-            if num % divisor == 0:
-                quotient = int(num / divisor)
-                print("{:d} = {:d} * {:d}".format(num, quotient, divisor))
-                break
+    factors=$(factor "$1" | awk '{$1=""; print $0}' | sed 's/ //g')
+    factors_array=($factors)
 
-def factoring_challenge():
-    """Factorize numbers from a file"""
-    import sys
+    if [ ${#factors_array[@]} -eq 1 ]; then
+        echo "$1=1*$1"
+    else
+        max_factor=${factors_array[-1]}
+        second_max_factor=${factors_array[-2]}
 
-    args = sys.argv
-    if len(args) < 2:
-        print("Error! Usage: ./factors filename")
-        exit(98)
-    file_name = args[1]
-    with open(file_name) as file_in:
-        lines = file_in.readlines()
-    check_factors(lines)
+        if [ ${#factors_array[@]} -gt 2 ]; then
+            for ((i=${#factors_array[@]}-3; i>=0; i--)); do
+                if [ $(echo "${factors_array[$i]}*$second_max_factor" | bc) -gt $(echo "$max_factor*${
+factors_array[$i+1]}" | bc) ]; then
+                    break
+                fi
 
-factoring_challenge()
+                second_max_factor=${factors_array[$i]}
+            done
+        fi
+
+        echo "$1=$max_factor*$second_max_factor"
+    fi
+}
+
+if [ $# -ne 1 ]; then
+    echo 'Usage: factors <file>'
+    exit 1
+else
+    while read -r number; do
+        check_factor "$number"
+    done < "$1"
+fi
